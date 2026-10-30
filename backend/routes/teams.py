@@ -34,5 +34,5 @@ def create_team(
     record_audit(connection, current_user["id"], "create team", "Team")
     connection.commit()
 
-    row = connection.execute("SELECT * FROM team WHERE id = ?", (team_id)).fetchone()
+    row = connection.execute("SELECT * teams FROM team WHERE id = ?", (team_id)).fetchone()
     return TeamOut(**dict(row))
