@@ -26,7 +26,7 @@ CREATE TABLE if NOT EXISTS categories(
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
     cpde TEXT NOT NULL UNIQUE,
-    color TEXT
+    colour TEXT
 );
 
 CREATE TABLE IF NOT EXISTS availability(
