@@ -43,16 +43,16 @@ class TeamOut(BaseModel):
     updated_by: Optional[str] = None
 
 # Categories
-class CagegoryCreate(BaseModel):
+class CategoryCreate(BaseModel):
     name: str = Field(min_length = 1)
     code: str = Field(min_length = 1)
-    color: Optional[str] = None
+    colour: Optional[str] = None
  
 class CategoryOut(BaseModel):
     id: str
     name: str
     code: str
-    color: str
+    colour: str
 
 # Availability
 class AvailiabilityCreate(BaseModel):
