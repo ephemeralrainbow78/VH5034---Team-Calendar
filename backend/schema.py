@@ -55,7 +55,7 @@ class CategoryOut(BaseModel):
     colour: str
 
 # Availability
-class AvailiabilityCreate(BaseModel):
+class AvailabilityCreate(BaseModel):
     user_id: str
     category_id: str
     start_date: date
@@ -63,13 +63,13 @@ class AvailiabilityCreate(BaseModel):
     notes: Optional[str] = None
     team_id: Optional[str] = None
 
-class AvailiabilityUpdate(BaseModel):
+class AvailabilityUpdate(BaseModel):
     category_id: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     notes: Optional[str] = None
 
-class AvailiabilityOut(BaseModel):
+class AvailabilityOut(BaseModel):
     id: str
     user_id: str
     category_id: str
