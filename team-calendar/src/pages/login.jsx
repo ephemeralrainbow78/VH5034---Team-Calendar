@@ -1,11 +1,23 @@
 import {useState} from 'react'
 import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
 import { Link } from 'react-router-dom'
+import { Login } from '../routes/auth'
 
 export const LoginPage = () => {
 
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+
+        const loginData = {
+            "username": username,
+            "password": password
+        }
+
+        Login(loginData)
+    }
 
     return(
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -21,7 +33,9 @@ export const LoginPage = () => {
                         <Stack spacing={2.5}>
                             <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} fullWidth autoFocus />
                             <TextField label="Password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" fullWidth />
-                            <Button type="submit" variant="contained" size="large" fullWidth>Log In</Button>
+                            <Button type="submit" variant="contained" size="large" onClick={handleSubmit} fullWidth>
+                                Log In
+                            </Button>
                         </Stack>
                     </Box>
                 </Paper>
