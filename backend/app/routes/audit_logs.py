@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends
 from ..user_dependents import get_database, get_current_user
 from ..schema import AuditLogOut
 
-router = APIRouter("/api/audit-logs", tag=["audit-logs"])
+router = APIRouter(prefix="/api/audit-logs", tags=["audit-logs"])
 
 @router.get("", response_model=list[AuditLogOut])
 def list_audit_logs(

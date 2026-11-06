@@ -4,7 +4,7 @@ import uuid
 from fastapi import APIRouter, HTTPException, Depends, status
 
 from ..audit import record_audit
-from ..database import get_connection, get_current_user
+from ..user_dependents import get_connection, get_current_user
 from ..schema import LoginRequest, SignUpRequest, tokenResponse, UserOut
 from ..security import create_access_token, verify_password, hashed_password
 

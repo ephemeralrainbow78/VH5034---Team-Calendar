@@ -14,7 +14,7 @@ SET_TEAMS = ["Software", "Infrastructure", "Delivery", "Marketing"]
 SET_CATEGORIES = [
     {"Annual Leave", "AL", "#EDE7F9"},
     {"Sixk leave", "SL", "#FBE9E9"},
-    {"Working Away From Office", "OOOE", "#E8EFFC"},
+    {"Working Away From Office", "OOO", "#E8EFFC"},
     {"Bank Holiday", "BH", "#FDF2DD"},
     {"Toil", "T", "#E9F9E7"},
     {"Study Day", "S", "#F9F3E7"},
@@ -34,16 +34,16 @@ def init_database() -> None:
 
         for name in SET_TEAMS:
             existing = connection.execute(
-                "SELECT id from teams WHERE name = ? COLLATE NOCASE", {name,}
+                "SELECT id from teams WHERE name = ? COLLATE NOCASE", (name,)
             ).fetchone()
             if not existing:
                 connection.execute(
-                    "INSERT INTO team (id, name) VALUES (?,?)",
+                    "INSERT OR IGNORE INTO teams (id, name) VALUES (?,?)",
                     (str(uuid.uuid4()), name)
                 )
         for name, code, colour in SET_CATEGORIES:
-             existing - connection.execute(
-                 "SELECT id FROM categories WHERE code = ?", (code)
+             existing = connection.execute(
+                 "SELECT id FROM categories WHERE code = ?", (code,)
              ).fetchone()
              if not existing:
                  connection.execute(

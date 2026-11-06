@@ -5,13 +5,13 @@ import jwt
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from .database import get_database_connection
+from .database import get_connection
 from .security import decode_access_token
 
 bearer_schema = HTTPBearer(auto_error=False)
 
 def get_database() -> Iterator[sqlite3.Connection]:
-    connection = get_database_connection()
+    connection = get_connection()
     try:
         yield connection
     finally:

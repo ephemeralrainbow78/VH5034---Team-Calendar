@@ -9,7 +9,7 @@ from ..schema import TeamCreate, TeamOut
 
 router = APIRouter(prefix="/api/teams", tags=["teams"])
 
-@router.get("", response_module=list[TeamOut])
+@router.get("", response_model=list[TeamOut])
 def list_teams(connection: sqlite3.Connection = Depends(get_database)):
     rows = connection.execute("SELECT * FROM team ORDER BY name COLLATE NOCASE").fetchall()
     return [TeamOut(**dict(row)) for row in rows]
