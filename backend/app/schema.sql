@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS team (
+CREATE TABLE IF NOT EXISTS teams (
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL UNIQUE COLLATE NOCASE,
     description TEXT,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS users (
     last_name TEXT NOT NULL,
     username TEXT NOT NULL UNIQUE COLLATE NOCASE,
     password TEXT NOT NULL,
-    team_id TEXT REFERNCES team(id),
+    team_id TEXT REFERENCES teams(id),
     is_active INTEGER NOT NULL DEFAULT 1,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     created_by TEXT,
@@ -25,13 +25,13 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE if NOT EXISTS categories(
     id TEXT PRIMARY KEY,
     name TEXT NOT NULL,
-    cpde TEXT NOT NULL UNIQUE,
-    color TEXT
+    code TEXT NOT NULL UNIQUE,
+    colour TEXT
 );
 
 CREATE TABLE IF NOT EXISTS availability(
     id TEXT PRIMARY KEY,
-    user_id TEXT NOT NULL REFERENCES users(id)
+    user_id TEXT NOT NULL REFERENCES users(id),
     category_id TEXT NOT NULL REFERENCES categories(id),
     start_date TEXT NOT NULL,
     end_date TEXT NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS availability(
     created_by TEXT,
     last_updated TEXT,
     last_updated_by TEXT DEFAULT (datetime('now')),
-    team_id TEXT REFERENCES team(id)
+    team_id TEXT REFERENCES teams(id)
 );
 
 CREATE TABLE IF NOT EXISTS audit_logs(
