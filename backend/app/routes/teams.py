@@ -28,11 +28,11 @@ def create_team(
 
     team_id = str(uuid.uuid4())
     connection.execute(
-        "INSERT INTO teams (id, name, description, created_by) VALUES (?,?,?,?)",
+        "INSERT INTO team (id, name, description, created_by) VALUES (?,?,?,?)",
         (team_id, payload.name.strip(), payload.description, current_user["username"]),
     )
     record_audit(connection, current_user["id"], "create team", "Team")
     connection.commit()
 
-    row = connection.execute("SELECT * FROM team WHERE id = ?", (team_id)).fetchone()
+    row = connection.execute("SELECT * FROM team WHERE id = ?", (team_id,)).fetchone()
     return TeamOut(**dict(row))

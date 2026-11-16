@@ -10,6 +10,7 @@ class SignUpRequest(BaseModel):
     username: str = Field(min_length = 1)
     password:str = Field(min_length = 12)
     team: str = Field(min_length = 1)
+    role: str
 
 class LoginRequest(BaseModel):
     username: str = Field(min_length = 1)
@@ -22,7 +23,8 @@ class UserOut(BaseModel):
     username: str 
     team_id: Optional[str] = None
     team: Optional [str] = None
-    is_Active: bool
+    role: str
+    is_active: bool
 
 class tokenResponse(BaseModel):
     token: str

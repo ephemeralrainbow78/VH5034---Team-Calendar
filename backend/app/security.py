@@ -6,14 +6,18 @@ import jwt
 
 SECRET = os.environ.get("SECRET")
 ALGORITHM = os.environ.get("ALGORITHM")
-TOKEN_EXPIRY = os.environ.get("TOKEN_EXPIRY")
 
+# Token expiry in minutes. Defaults to 30 minutes if value is not set as an environment variable.
+TOKEN_EXPIRY = int(os.environ.get("TOKEN_EXPIRY", "30"))
+
+# Password hashing and verification
 def hashed_password(password: str) -> str:
-    return bcrypt.hash.pw(password.encode("utf-8"), bcrypt.gensalt()).decode("uft-8")
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
 
 def verify_password(password: str, passsword_hash: str) -> bool:
-    return bcrypt.checkpw(password.encode("uft-8"), passsword_hash.encode("uft-8"))
+    return bcrypt.checkpw(password.encode("utf-8"), passsword_hash.encode("utf-8"))
 
+# JWT token creation and decoding
 def create_access_token(user_id: str, username: str) -> str:
     now = datetime.now(timezone.utc)
     payload = {

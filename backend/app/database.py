@@ -32,13 +32,21 @@ def init_database() -> None:
     try:
         connection.executescript(SCHEMA)
 
+        user_columns = {
+            row["name"] for row in connection.execute("PRAGMA table_info(users)")
+        }
+        if "role" not in user_columns:
+            connection.execute(
+                "ALTER TABLE users ADD COLUMN role TEXT NOT NULL DEFAULT 'User'"
+            )
+
         for name in SET_TEAMS:
             existing = connection.execute(
-                "SELECT id from teams WHERE name = ? COLLATE NOCASE", (name,)
+                "SELECT id from team WHERE name = ? COLLATE NOCASE", (name,)
             ).fetchone()
             if not existing:
                 connection.execute(
-                    "INSERT OR IGNORE INTO teams (id, name) VALUES (?,?)",
+                    "INSERT OR IGNORE INTO team (id, name) VALUES (?,?)",
                     (str(uuid.uuid4()), name)
                 )
         for name, code, colour in SET_CATEGORIES:

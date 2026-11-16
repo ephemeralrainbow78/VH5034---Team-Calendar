@@ -18,6 +18,7 @@ def _user_out(row: sqlite3.Row, team_name: str | None) -> UserOut:
         username = row["username"],
         team_id = row["team_id"],
         team = team_name,
+        role= row["role"],
         is_active = bool(row["is_Active"])
     )
 
@@ -40,8 +41,9 @@ def signup(payload: SignUpRequest, connection: sqlite3.Connection = Depends(get_
         raise HTTPException(status_code=409, detail="An account with this username already exisits.")
 
     team_name = payload.team.strip()
+
     team_row = connection.execute(
-        "SELECT id, name FROM team WHERE name ? COLLATE NOCASE", (team_name,),
+        "SELECT id, name FROM team WHERE name = ? COLLATE NOCASE", (team_name,),
     ).fetchone()
 
     if team_row is None:
@@ -53,8 +55,8 @@ def signup(payload: SignUpRequest, connection: sqlite3.Connection = Depends(get_
     user_id = str(uuid.uuid4())
     connection.execute(
         """
-        INSERT INTO users (id, first_name, last_name, username, password, team_id, is_active)
-        VALUES (?,?,?,?,?,?,?)
+        INSERT INTO users (id, first_name, last_name, username, password, team_id, role, is_active)
+        VALUES (?,?,?,?,?,?,?, ?)
         """,
         (
             user_id,
@@ -62,11 +64,16 @@ def signup(payload: SignUpRequest, connection: sqlite3.Connection = Depends(get_
             payload.last_name.strip(),
             payload.username.strip(),
             hashed_password(payload.password),
-            team_id
+            team_id,
+            payload.role,
+            1
         ),
     )
 
+    connection.commit()
+
     row = _fetch_user_and_team(connection, user_id)
+
     return _user_out(row, row["team_name"])
 
 @router.post("/login", response_model=tokenResponse)
