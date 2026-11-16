@@ -15,3 +15,22 @@ export const Login = async (loginData) => {
         console.error(error)
     }
 }
+
+export const Signup = async (signupData) => {
+    try {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/auth/signup`, {
+            method: "POST",
+            credentials: "include",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(signupData)
+        })
+        const data = await response.json()
+        if (!response.ok) {
+            throw new Error(data.detail || `HTTP Error: ${response.status}`)
+        }
+        return data
+    } catch (error) {
+        console.error("Signup error", error)
+        throw error
+    }
+}
