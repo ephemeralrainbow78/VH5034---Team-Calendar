@@ -90,7 +90,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                     </Stack>
                     <SnapshotCards />
                 </Box>
-                <Paper variant="outlined" sx={{ borderColor: 'divider' }}>
+                <Paper variant="outlined" sx={{ borderColor: 'divider', mt: { xs: 4, md: 5 } }}>
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
                         <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFitler} staffCount={staff.length} />
                     </Box>
