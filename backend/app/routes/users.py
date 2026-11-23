@@ -21,8 +21,12 @@ def list_users(
     connection: sqlite3.Connection = Depends(get_database),
 ):
     rows = connection.execute(
+<<<<<<< HEAD
         USER_SELECT
         + " ORDER BY users.last_name COLLATE NOCASE, users.first_name COLLATE NOCASE"
+=======
+        USER_SELECT + " ORDER BY users.last_name COLLATE NOCASE, users.first_name COLLATE NOCASE"
+>>>>>>> 8dff5669d4d7a4eed025a4ad06ef4a421cea3633
     ).fetchall()
     return [UserOut(**dict(row)) for row in rows]
 
@@ -33,7 +37,17 @@ def get_user(
     current_user: sqlite3.Row = Depends(get_current_user),
     connection: sqlite3.Connection = Depends(get_database),
 ):
+<<<<<<< HEAD
     row = connection.execute(USER_SELECT + " WHERE users.id = ?", (user_id,)).fetchone()
     if row is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return UserOut(**dict(row))
+=======
+    row = connection.execute(
+        USER_SELECT + " WHERE users.id = ?",
+        (user_id,),
+    ).fetchone()
+    if row is None:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return UserOut(**dict(row))
+>>>>>>> 8dff5669d4d7a4eed025a4ad06ef4a421cea3633
