@@ -21,7 +21,7 @@ SET_CATEGORIES = [
 ]
 
 def get_connection() -> sqlite3.Connection:
-    connection = sqlite3.connect(DB_Path)
+    connection = sqlite3.connect(DB_Path, check_same_thread=False)
     connection.row_factory = sqlite3.Row
     connection.execute("PRAGMA foreign_keys = ON")
     

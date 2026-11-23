@@ -9,8 +9,17 @@ from ..schema import AvailabilityCreate, AvailabilityOut, AvailabilityUpdate
 
 router = APIRouter(prefix="/api/availiability", tags=["availiability"])
 
+AVAILABILITY_SELECT = """
+    SELECT id, user_id, category_id, start_date, end_date, noted AS notes,
+           team_id, created_by, last_updated, last_updated_by
+    FROM availability
+"""
+
+
 def _get_availability(connection: sqlite3.Connection, availability_id: str) -> sqlite3.Row:
-    row = connection.execute("SELECT * FROM availiability WHERE id = ?", (availability_id)).fetchone()
+    row = connection.execute(
+        AVAILABILITY_SELECT + " WHERE id = ?", (availability_id,)
+    ).fetchone()
     if row is None:
         raise HTTPException(status_code=404, detail="Availability record not found.")
     return row
@@ -22,7 +31,7 @@ def list_availability(
     current_user: sqlite3.Row = Depends(get_current_user),
     connection: sqlite3.Connection = Depends(get_database),
 ):
-    query = "SELECT * FROM availability WHERE 1=1"
+    query = AVAILABILITY_SELECT + " WHERE 1=1"
     params: list[str] = []
     if user_id:
         query += " AND user_id = ?"
@@ -30,10 +39,10 @@ def list_availability(
     if team_id:
         query += " AND team_id = ?"
         params.append(team_id)
-    query += " ORDER_BY start_date"
+    query += " ORDER BY start_date"
 
     rows = connection.execute(query, params).fetchall()
-    return [(AvailabilityOut(**dict)) for row in rows]
+    return [AvailabilityOut(**dict(row)) for row in rows]
 
 @router.post("", response_model=AvailabilityOut, status_code=status.HTTP_201_CREATED)
 def create_availability(
@@ -41,10 +50,19 @@ def create_availability(
     current_user: sqlite3.Row = Depends(get_current_user),
     connection: sqlite3.Connection = Depends(get_database)
 ):
-    user_row = connection.execute("SELECT id FROm users WHERE id = ?", (payload.user_id,)).fetchone()
-    
+    user_row = connection.execute(
+        "SELECT id, team_id FROM users WHERE id = ? AND is_active = 1",
+        (payload.user_id,),
+    ).fetchone()
     if user_row is None:
         raise HTTPException(status_code=404, detail="User not found")
+    role = current_user["role"].casefold()
+    if role == "manager":
+        if current_user["team_id"] is None or user_row["team_id"] != current_user["team_id"]:
+            raise HTTPException(status_code=403, detail="Managers can only add absences for their own team.")
+    elif role != "admin" and payload.user_id != current_user["id"]:
+        raise HTTPException(status_code=403, detail="You can only add an absence for yourself.")
+
     category_row = connection.execute(
         "SELECT id FROM categories WHERE id = ?", (payload.category_id,)
     ).fetchone()
@@ -54,7 +72,7 @@ def create_availability(
     connection.execute(
         """
         INSERT INTO availability
-        (id, User_id, category_id, start_date, end_date, notes, team_id, created_by, last_updated, last_updated_by)
+        (id, user_id, category_id, start_date, end_date, noted, team_id, created_by, last_updated, last_updated_by)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'), ?)
         """,
         (
@@ -64,7 +82,7 @@ def create_availability(
             payload.start_date,
             payload.end_date,
             payload.notes,
-            payload.team_id,
+            user_row["team_id"],
             current_user["username"],
             current_user["username"],
         )
@@ -89,6 +107,8 @@ def update_availability(
         updates["start_date"] = updates["start_date"].isoformat()
     if "end_date" in updates:
         updates["end_date"] = updates["end_date"].isoformat()
+    if "notes" in updates:
+        updates["noted"] = updates.pop("notes")
     if "category_id" in updates:
         category_row = connection.execute(
             "SELECT id FROM categories WHERE id = ?", (updates["category_id"],)

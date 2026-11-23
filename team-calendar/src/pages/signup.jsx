@@ -1,5 +1,6 @@
 import { Box, Button, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
+import { useNavigate } from "react-router-dom"
 import { GetTeams } from "../routes/team"
 import { Signup } from "../routes/auth"
 
@@ -21,8 +22,8 @@ const ROLES = [
 
 export const SignupPage = () => {
 
+    const navigate = useNavigate()
     const [error, setError] = useState('')
-    const [success, setSuccess] = useState('')
     const [form, setForm] = useState(EMPTY_SIGNUP_FORM)
     const [teams, setTeams] = useState([])
 
@@ -34,7 +35,6 @@ export const SignupPage = () => {
 
         try{
             setError('')
-            setSuccess('')
             const signupData = {
                 first_name: form.first_name,
                 last_name: form.last_name,
@@ -44,8 +44,7 @@ export const SignupPage = () => {
                 role: form.role
             }
             await Signup(signupData)
-            setSuccess('Account created. You can now sign in.')
-            navigate('/login')
+            navigate('/', { replace: true })
         }catch (error) {
             setError(error.message)
         }
@@ -79,7 +78,6 @@ export const SignupPage = () => {
                     <Box component="form" onSubmit={handleSubmit} noValidate>
                         <Stack spacing={2.5}>
                             {error && <Typography color="error" role="alert">{error}</Typography>}
-                            {success && <Typography color="success.main" role="status">{success}</Typography>}
                             <TextField label="First Name" value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} fullWidth autoFocus />
                             <TextField label="Last Name" value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} fullWidth autoFocus />
                             <TextField label="Username" value={form.username} onChange={(e) => setForm({...form, username: e.target.value})} fullWidth autoFocus />

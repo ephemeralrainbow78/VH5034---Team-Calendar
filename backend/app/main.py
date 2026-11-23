@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 load_dotenv()
 
 from .database import init_database
-from .routes import audit_logs, auth, availability, categories, teams
+from .routes import audit_logs, auth, availability, categories, teams, users
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -26,6 +26,7 @@ app.add_middleware(
 
 app.include_router(auth.router)
 app.include_router(teams.router)
+app.include_router(users.router)
 app.include_router(categories.router)
 app.include_router(availability.router)
 app.include_router(audit_logs.router)
