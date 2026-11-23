@@ -17,6 +17,15 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1)
 
 
+class PasswordChangeRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=12)
+
+
+class MessageOut(BaseModel):
+    message: str
+
+
 class UserOut(BaseModel):
     id: str
     first_name: str

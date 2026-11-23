@@ -1,5 +1,5 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material"
-import { Add, FiberManualRecord, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
+import { AccountCircle, Add, FiberManualRecord, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
 import { Link } from "react-router-dom"
 
 export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }) => {
@@ -13,10 +13,13 @@ export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }
                     <Chip size="small" icon={<FiberManualRecord sx={{ fontSize: 10 }} color="success" />} label="Live" sx={{ bgcolor: '#e7f5ec', color: '#12825a', fontWeight: 700, '& .MuiChip-icon': { ml: '8px' } }} />
                 </Stack>
                 <Typography variant="body2" sx={{ my: 0.5 }}>
-                    {currentUser ? `Signed in ${currentUser.name} - ${currentUser.team}` : `A view of the team's calendar`}
+                    {currentUser ? `Signed in ${currentUser.first_name} - ${currentUser.team}` : `A view of the team's calendar`}
                 </Typography>
             </Box>
             <Stack direction="row" spacing={1.5}>
+                <Button component={Link} to="/account" variant="outlined" color="inherit" startIcon={<AccountCircle />} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
+                    My Account
+                </Button>
                 {currentUser?.role?.toLowerCase() === 'admin' && (
                     <Button component={Link} to="/teams" variant="outlined" color="inherit" startIcon={<Groups />} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
                         Manage Teams

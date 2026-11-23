@@ -26,6 +26,19 @@ export const GetCurrentUser = async (token) => {
     return readJsonResponse(response)
 }
 
+export const ChangePassword = async (token, passwordData) => {
+    const response = await fetch(`${API_BASE_URL}/auth/account/password`, {
+        method: "PATCH",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(passwordData)
+    })
+    notifySessionExpired(token, response)
+    return readJsonResponse(response)
+}
+
 export const Signup = async (signupData) => {
     try {
         const response = await fetch(`${API_BASE_URL}/auth/signup`, {
