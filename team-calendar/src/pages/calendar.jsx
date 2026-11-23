@@ -78,7 +78,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     return (
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: { xs: 3, md: 5 } }}>
             <Container maxWidth="lg">
-                <CalendarHeader onExport={handleExportCalendar} onAddAbsence={() => setDialogOpen(true)} onLogout={onLogout}/>
+                <CalendarHeader onExport={handleExportCalendar} onAddAbsence={() => setDialogOpen(true)} currentUser={currentUser} onLogout={onLogout}/>
                 <Box>
                     <Stack direction='row' sx={{ flexWrap: 'wrap', mb: 1.5, justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>

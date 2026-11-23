@@ -1,5 +1,6 @@
 import { Box, Button, Chip, Stack, Typography } from "@mui/material"
-import { Add, FiberManualRecord, FileDownloadDoneOutlined, Logout } from "@mui/icons-material"
+import { Add, FiberManualRecord, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
+import { Link } from "react-router-dom"
 
 export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }) => {
     return (
@@ -16,6 +17,11 @@ export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }
                 </Typography>
             </Box>
             <Stack direction="row" spacing={1.5}>
+                {currentUser?.role?.toLowerCase() === 'admin' && (
+                    <Button component={Link} to="/teams" variant="outlined" color="inherit" startIcon={<Groups />} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
+                        Manage Teams
+                    </Button>
+                )}
                 <Button variant="outlined" color="inherit" startIcon={<FileDownloadDoneOutlined />} onClick={onExport} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
                     Export
                 </Button>
