@@ -1,15 +1,14 @@
-import { daysInMonth } from './dates'
-
 export const exportCalendarToExcel = async ({
     year,
     month,
+    days,
+    viewMode,
     staff,
     availability,
     categories,
     today
 }) => {
     const { default: ExcelJS } = await import('exceljs')
-    const days = daysInMonth(year, month)
     const daysToDate = days.filter((day) => day <= today)
     const monthStart = days[0]
     const monthEnd = days[days.length - 1]
@@ -47,7 +46,7 @@ export const exportCalendarToExcel = async ({
             }).format(day),
             width: 15
         })),
-        { header: 'Days in to date', width: 18 }
+        { header: viewMode === 'week' ? 'Week to date' : 'Days in to date', width: 18 }
     ]
 
     staff.forEach((user) => {
@@ -80,7 +79,9 @@ export const exportCalendarToExcel = async ({
         to: { row: 1, column: worksheet.columnCount }
     }
 
-    const fileName = `team-calendar-${year}-${String(month + 1).padStart(2, '0')}.xlsx`
+    const fileName = viewMode === 'week'
+        ? `team-calendar-week-${dateKey(days[0])}.xlsx`
+        : `team-calendar-${year}-${String(month + 1).padStart(2, '0')}.xlsx`
     const content = await workbook.xlsx.writeBuffer()
     const url = window.URL.createObjectURL(new Blob([content], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

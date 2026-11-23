@@ -3,7 +3,7 @@ import { CalendarHeader } from "../components/calendar_header"
 import { SnapshotCards } from "../components/snapshot_cards"
 import { CalendarToolbar } from "../components/calendar_toolbar"
 import { useEffect, useMemo, useState } from "react"
-import { TODAY } from "../utils/dates"
+import { daysInMonth, daysInWeek, TODAY } from "../utils/dates"
 import { exportCalendarToExcel } from "../utils/calendar_export"
 import { getTodaySnapshot } from "../utils/calendar_snapshot"
 import { filterCalendarStaff } from "../utils/calendar_filters"
@@ -16,7 +16,15 @@ import { AddAbsenceDialog } from "../components/add_absence_dialog"
 import { AddCategoryDialog } from "../components/add_category_dialog"
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
+const WEEK_DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })
+const SYNC_TIME_FORMATTER = new Intl.DateTimeFormat('en-GB', { hour: '2-digit', minute: '2-digit' })
 const SNAPSHOT_DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+
+const dateKey = (date) => [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2, '0'),
+    String(date.getDate()).padStart(2, '0')
+].join('-')
 
 export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [viewMode, setViewMode] = useState('month')
@@ -29,16 +37,28 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [availability, setAvailability] = useState([])
     const [categories, setCategories] = useState([])
     const [loadedCalendarRefresh, setLoadedCalendarRefresh] = useState(null)
+    const [lastSyncedAt, setLastSyncedAt] = useState(null)
     const [calendarDataError, setCalendarDataError] = useState('')
     const [calendarExportError, setCalendarExportError] = useState('')
     const [calendarActionAlert, setCalendarActionAlert] = useState(null)
     const [calendarRefresh, setCalendarRefresh] = useState(0)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
-    const [cursor, setCursor] = useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
+    const [cursor, setCursor] = useState(TODAY)
 
     const year = cursor.getFullYear()
     const month = cursor.getMonth()
+    const visibleDays = useMemo(
+        () => viewMode === 'week' ? daysInWeek(cursor) : daysInMonth(year, month),
+        [viewMode, cursor, year, month]
+    )
+    const rangeStart = dateKey(visibleDays[0])
+    const rangeEnd = dateKey(visibleDays[visibleDays.length - 1])
+    const periodLabel = viewMode === 'week'
+        ? visibleDays[0].getMonth() === visibleDays[visibleDays.length - 1].getMonth()
+            ? `${visibleDays[0].getDate()}-${visibleDays[visibleDays.length - 1].getDate()} ${MONTH_FORMATTER.format(visibleDays[visibleDays.length - 1])}`
+            : `${WEEK_DATE_FORMATTER.format(visibleDays[0])} - ${WEEK_DATE_FORMATTER.format(visibleDays[visibleDays.length - 1])}`
+        : MONTH_FORMATTER.format(cursor)
     const snapshot = useMemo(
         () => getTodaySnapshot({ staff, availability, categories, today: TODAY }),
         [staff, availability, categories]
@@ -51,10 +71,10 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
             search,
             team,
             statusFilter,
-            year,
-            month
+            rangeStart,
+            rangeEnd
         }),
-        [staff, availability, categories, search, team, statusFilter, year, month]
+        [staff, availability, categories, search, team, statusFilter, rangeStart, rangeEnd]
     )
     const snapshotLoading = !usersLoaded || loadedCalendarRefresh !== calendarRefresh
     const snapshotUnavailable = Boolean(usersError || calendarDataError)
@@ -64,7 +84,25 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     }
 
     const goToToday = () => {
-        setCursor(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
+        setCursor(TODAY)
+    }
+
+    const goToWeek = (delta) => {
+        setCursor((current) => {
+            const nextDate = new Date(current)
+            nextDate.setDate(nextDate.getDate() + delta * 7)
+            return nextDate
+        })
+    }
+
+    const goToPreviousPeriod = () => {
+        if (viewMode === 'week') goToWeek(-1)
+        else goToMonth(-1)
+    }
+
+    const goToNextPeriod = () => {
+        if (viewMode === 'week') goToWeek(1)
+        else goToMonth(1)
     }
 
     const handleExportCalendar = async () => {
@@ -73,6 +111,8 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
             await exportCalendarToExcel({
                 year,
                 month,
+                days: visibleDays,
+                viewMode,
                 staff: filteredStaff,
                 availability,
                 categories,
@@ -123,6 +163,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                 setAvailability(entries)
                 setCategories(categoryList)
                 setCalendarDataError('')
+                setLastSyncedAt(new Date())
             })
             .catch(error => {
                 if (active) setCalendarDataError(`Could not load calendar data: ${error.message}`)
@@ -158,11 +199,16 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                 {calendarExportError && <Alert severity="error" sx={{ mt: 2 }}>{calendarExportError}</Alert>}
                 <Box>
                     <Stack direction='row' sx={{ flexWrap: 'wrap', mb: 1.5, justifyContent: 'space-between', alignItems: 'baseline' }}>
-                        <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>
-                            Today's Snapshot
-                        </Typography>
-                        <Typography variant="caption" color="text.seconday">
-                            Last Synced at
+                        <Stack direction="row" spacing={1.5} sx={{ alignItems: 'baseline' }}>
+                            <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>
+                                Today's Snapshot · 
+                            </Typography>
+                            <Typography variant="caption" color="text.secondary">
+                                {SNAPSHOT_DATE_FORMATTER.format(TODAY)}
+                            </Typography>
+                        </Stack>
+                        <Typography variant="caption" color="text.secondary">
+                            Last synced at {lastSyncedAt ? SYNC_TIME_FORMATTER.format(lastSyncedAt) : '—'}
                         </Typography>
                     </Stack>
                     <SnapshotCards
@@ -173,12 +219,12 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                 </Box>
                 <Paper variant="outlined" sx={{ borderColor: 'divider', mt: { xs: 4, md: 5 } }}>
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
-                        <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} categories={categories} isAdmin={currentUser?.role?.toLowerCase() === 'admin'} onAddCategory={() => setCategoryDialogOpen(true)} />
+                        <CalendarToolbar monthLabel={periodLabel} onPreviousMonth={goToPreviousPeriod} onNextMonth={goToNextPeriod} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} categories={categories} isAdmin={currentUser?.role?.toLowerCase() === 'admin'} onAddCategory={() => setCategoryDialogOpen(true)} />
                     </Box>
                     {usersError && <Alert severity="error" sx={{ m: 2 }}>Could not load users: {usersError}</Alert>}
                     {calendarDataError && <Alert severity="error" sx={{ m: 2 }}>{calendarDataError}</Alert>}
                     <Divider />
-                    <CalendarGrid year={year} month={month} today={TODAY} staff={filteredStaff} availability={availability} categories={categories}/>
+                    <CalendarGrid year={year} month={month} today={TODAY} staff={filteredStaff} availability={availability} categories={categories} visibleDays={visibleDays} viewMode={viewMode}/>
                     <CalendarLegend categories={categories} />
                 </Paper>
                 <AddAbsenceDialog
