@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react"
 import { TODAY } from "../utils/dates"
 import { exportCalendarToExcel } from "../utils/calendar_export"
 import { getTodaySnapshot } from "../utils/calendar_snapshot"
+import { filterCalendarStaff } from "../utils/calendar_filters"
 import { CalendarGrid } from "../components/calendar_grid"
 import { GetUsers } from "../routes/users"
 import { GetAvailability } from "../routes/availiability"
@@ -17,9 +18,9 @@ const SNAPSHOT_DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', { weekday: 'lon
 
 export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [viewMode, setViewMode] = useState('month')
-    const [search, setSearch] = useState('all')
+    const [search, setSearch] = useState('')
     const [team, setTeam] = useState('all')
-    const [statusFilter, setStatusFitler] = useState('all')
+    const [statusFilter, setStatusFilter] = useState('all')
     const [staff, setStaff] = useState([])
     const [usersLoaded, setUsersLoaded] = useState(false)
     const [usersError, setUsersError] = useState('')
@@ -38,6 +39,19 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
         () => getTodaySnapshot({ staff, availability, categories, today: TODAY }),
         [staff, availability, categories]
     )
+    const filteredStaff = useMemo(
+        () => filterCalendarStaff({
+            staff,
+            availability,
+            categories,
+            search,
+            team,
+            statusFilter,
+            year,
+            month
+        }),
+        [staff, availability, categories, search, team, statusFilter, year, month]
+    )
     const snapshotLoading = !usersLoaded || loadedCalendarRefresh !== calendarRefresh
     const snapshotUnavailable = Boolean(usersError || calendarDataError)
 
@@ -55,7 +69,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
             await exportCalendarToExcel({
                 year,
                 month,
-                staff,
+                staff: filteredStaff,
                 availability,
                 categories,
                 today: TODAY
@@ -134,12 +148,12 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                 </Box>
                 <Paper variant="outlined" sx={{ borderColor: 'divider', mt: { xs: 4, md: 5 } }}>
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
-                        <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFitler} staffCount={staff.length} />
+                        <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} />
                     </Box>
                     {usersError && <Typography color="error" role="alert">Could not load users: {usersError}</Typography>}
                     {calendarDataError && <Typography color="error" role="alert">{calendarDataError}</Typography>}
                     <Divider />
-                    <CalendarGrid year={year} month={month} today={TODAY} staff={staff} availability={availability} categories={categories}/>
+                    <CalendarGrid year={year} month={month} today={TODAY} staff={filteredStaff} availability={availability} categories={categories}/>
                 </Paper>
                 <AddAbsenceDialog
                     open={dialogOpen}

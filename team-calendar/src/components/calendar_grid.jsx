@@ -82,6 +82,13 @@ export const CalendarGrid = ({ year, month, today, staff = [], availability = []
                         to date
                     </Typography>
                 </Box>
+                {sortedStaff.length === 0 && (
+                    <Box sx={{ gridColumn: '1 / -1', px: 2, py: 3 }}>
+                        <Typography color="text.secondary" role="status">
+                            No staff match the selected filters.
+                        </Typography>
+                    </Box>
+                )}
                 {sortedStaff.map((user) => (
                     <StaffRow
                         key={user.id}
