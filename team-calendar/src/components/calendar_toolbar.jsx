@@ -7,6 +7,7 @@ import { GetCategories } from "../routes/categories"
 export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onToday, viewMode, onViewModeChange, search, onSearchChange, team, onTeamChange, statusFilter, onStatusFilterChange, staffCount }) => {
     const [teams, setTeams] = useState([])
     const [categories, setCategories] = useState([])
+    const [error, setError] = useState('')
 
     useEffect(() => {
         let cancelled = false
@@ -17,7 +18,7 @@ export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onTo
                     label: team.name
                 })))
             }
-            GetCategories().then(categoryRequest => {
+            return GetCategories().then(categoryRequest => {
                 if (!cancelled) {
                     setCategories(categoryRequest.map(category => ({
                         value: category.name
@@ -26,7 +27,7 @@ export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onTo
             })
         }).catch(error => {
             if (!cancelled) {
-                setError(`Could not load teams: ${error.message}`)
+                setError(`Could not load calendar filters: ${error.message}`)
             }
         })
 
@@ -37,6 +38,7 @@ export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onTo
 
     return (
         <Stack spacing={2}>
+            {error && <Typography color="error" role="alert">{error}</Typography>}
             <Stack direction="row" sx={{ flexWrap: 'wrap', rowGap: 1.5, justifyContent: 'space-between', alignItems: 'center' }}>
                 <Stack direction="row" space={1} sx={{ alignItems: 'center' }}>
                     <Typography variant="h6">{monthLabel}</Typography>
@@ -90,9 +92,11 @@ export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onTo
                     ))}
                 </TextField>
                 <Box sx={{flex: 1}} />
-                <Typography variant="body2" color="text.secondary">
-                    {staffCount} staff member{staffCount === 1 ? '' : 's'}
-                </Typography>
+                {Number.isFinite(staffCount) && (
+                    <Typography variant="body2" color="text.secondary">
+                        {staffCount} staff member{staffCount === 1 ? '' : 's'}
+                    </Typography>
+                )}
                 <IconButton size="small" aria-label="More options">
                     <Tune fontSize="small"/>
                 </IconButton>
