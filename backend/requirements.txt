@@ -1,5 +1,6 @@
 fastapi>=0.110
 uvicorn[standard]>=0.29
+gunicorn>=23.0; sys_platform != "win32"
 python-dotenv>=1.0
 PyJWT>=2.8
 bcrypt>=4.0
