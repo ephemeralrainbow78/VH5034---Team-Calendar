@@ -8,6 +8,7 @@ import { exportCalendarToExcel } from "../utils/calendar_export"
 import { getTodaySnapshot } from "../utils/calendar_snapshot"
 import { filterCalendarStaff } from "../utils/calendar_filters"
 import { CalendarGrid } from "../components/calendar_grid"
+import { CalendarLegend } from "../components/calendar_legend"
 import { GetUsers } from "../routes/users"
 import { GetAvailability } from "../routes/availiability"
 import { GetCategories } from "../routes/categories"
@@ -164,6 +165,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                     {calendarDataError && <Alert severity="error" sx={{ m: 2 }}>{calendarDataError}</Alert>}
                     <Divider />
                     <CalendarGrid year={year} month={month} today={TODAY} staff={filteredStaff} availability={availability} categories={categories}/>
+                    <CalendarLegend categories={categories} />
                 </Paper>
                 <AddAbsenceDialog
                     open={dialogOpen}
