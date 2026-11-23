@@ -1,3 +1,4 @@
+import { notifySessionExpired } from "./auth"
 import { API_BASE_URL, readJsonResponse } from "./api"
 
 export const GetCategories = async () => {
@@ -10,4 +11,17 @@ export const GetCategories = async () => {
         console.error(error)
         throw error
     }
+}
+
+export const CreateCategory = async (token, category) => {
+    const response = await fetch(`${API_BASE_URL}/categories`, {
+        method: "POST",
+        headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify(category)
+    })
+    notifySessionExpired(token, response)
+    return readJsonResponse(response)
 }

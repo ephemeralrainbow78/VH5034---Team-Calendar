@@ -68,8 +68,8 @@ class TeamOut(BaseModel):
 
 class CategoryCreate(BaseModel):
     name: str = Field(min_length=1)
-    code: str = Field(min_length=1)
-    colour: str | None = None
+    code: str = Field(min_length=1, max_length=5)
+    colour: str = Field(pattern=r"^#[0-9A-Fa-f]{6}$")
 
 
 class CategoryOut(BaseModel):

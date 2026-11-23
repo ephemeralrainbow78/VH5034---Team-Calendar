@@ -1,30 +1,19 @@
-import { ChevronLeft, ChevronRight, GroupOutlined, Search, Tune } from "@mui/icons-material"
+import { Add, ChevronLeft, ChevronRight, GroupOutlined, Search, Tune } from "@mui/icons-material"
 import { Box, Button, IconButton, InputAdornment, MenuItem, Stack, TextField, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { GetTeams } from "../routes/team"
-import { GetCategories } from "../routes/categories"
 
-export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onToday, viewMode, onViewModeChange, search, onSearchChange, team, onTeamChange, statusFilter, onStatusFilterChange, staffCount }) => {
+export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onToday, viewMode, onViewModeChange, search, onSearchChange, team, onTeamChange, statusFilter, onStatusFilterChange, staffCount, categories = [], isAdmin, onAddCategory }) => {
     const [teams, setTeams] = useState([])
-    const [categories, setCategories] = useState([])
     const [error, setError] = useState('')
 
     useEffect(() => {
         let cancelled = false
         GetTeams().then(teamRequest => {
-            if (!cancelled) {
-                setTeams(teamRequest.map(team => ({
-                    value: team.name,
-                    label: team.name
-                })))
-            }
-            return GetCategories().then(categoryRequest => {
-                if (!cancelled) {
-                    setCategories(categoryRequest.map(category => ({
-                        value: category.name
-                    })))
-                }
-            })
+            if (!cancelled) setTeams(teamRequest.map((team) => ({
+                value: team.name,
+                label: team.name
+            })))
         }).catch(error => {
             if (!cancelled) {
                 setError(`Could not load calendar filters: ${error.message}`)
@@ -91,6 +80,16 @@ export const CalendarToolbar = ({ monthLabel, onPreviousMonth, onNextMonth, onTo
                         </MenuItem>
                     ))}
                 </TextField>
+                {isAdmin && (
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        startIcon={<Add />}
+                        onClick={onAddCategory}
+                    >
+                        Add absence category
+                    </Button>
+                )}
                 <Box sx={{flex: 1}} />
                 {Number.isFinite(staffCount) && (
                     <Typography variant="body2" color="text.secondary">

@@ -13,6 +13,7 @@ import { GetUsers } from "../routes/users"
 import { GetAvailability } from "../routes/availiability"
 import { GetCategories } from "../routes/categories"
 import { AddAbsenceDialog } from "../components/add_absence_dialog"
+import { AddCategoryDialog } from "../components/add_category_dialog"
 
 const MONTH_FORMATTER = new Intl.DateTimeFormat('en-GB', { month: 'long', year: 'numeric' })
 const SNAPSHOT_DATE_FORMATTER = new Intl.DateTimeFormat('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -33,6 +34,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [calendarActionAlert, setCalendarActionAlert] = useState(null)
     const [calendarRefresh, setCalendarRefresh] = useState(0)
     const [dialogOpen, setDialogOpen] = useState(false)
+    const [categoryDialogOpen, setCategoryDialogOpen] = useState(false)
     const [cursor, setCursor] = useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
 
     const year = cursor.getFullYear()
@@ -79,6 +81,18 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
         } catch (error) {
             setCalendarExportError(`Could not export the calendar: ${error.message}`)
         }
+    }
+
+    const handleCategoryCreated = (category) => {
+        setCategories((current) => (
+            [...current, category].sort((first, second) => (
+                first.name.localeCompare(second.name, 'en', { sensitivity: 'base' })
+            ))
+        ))
+        setCalendarActionAlert({
+            severity: 'success',
+            message: `${category.name} category created successfully.`
+        })
     }
 
     useEffect(() => {
@@ -159,7 +173,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                 </Box>
                 <Paper variant="outlined" sx={{ borderColor: 'divider', mt: { xs: 4, md: 5 } }}>
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
-                        <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} />
+                        <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} categories={categories} isAdmin={currentUser?.role?.toLowerCase() === 'admin'} onAddCategory={() => setCategoryDialogOpen(true)} />
                     </Box>
                     {usersError && <Alert severity="error" sx={{ m: 2 }}>Could not load users: {usersError}</Alert>}
                     {calendarDataError && <Alert severity="error" sx={{ m: 2 }}>{calendarDataError}</Alert>}
@@ -179,6 +193,12 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                     }}
                     staff={staff}
                     currentUser={currentUser}
+                    token={token}
+                />
+                <AddCategoryDialog
+                    open={categoryDialogOpen}
+                    onClose={() => setCategoryDialogOpen(false)}
+                    onCreated={handleCategoryCreated}
                     token={token}
                 />
             </Container>
