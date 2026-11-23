@@ -4,6 +4,7 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..audit import record_audit
+from ..bank_holidays import ensure_bank_holidays_for_user
 from ..schema import (
     LoginRequest,
     MessageOut,
@@ -90,6 +91,7 @@ def signup(
             role.title(),
         ),
     )
+    ensure_bank_holidays_for_user(connection, user_id, team_id)
     record_audit(connection, user_id, "signup", "User")
     connection.commit()
 

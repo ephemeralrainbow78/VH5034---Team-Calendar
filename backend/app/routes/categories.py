@@ -24,18 +24,34 @@ def create_category(
     current_user: sqlite3.Row = Depends(get_current_user),
     connection: sqlite3.Connection = Depends(get_database),
 ):
+    if current_user["role"].casefold() != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Only administrators can create absence categories.",
+        )
+
     name = payload.name.strip()
-    code = payload.code.strip()
+    code = payload.code.strip().upper()
+    if not name or not code:
+        raise HTTPException(status_code=422, detail="Category name and code are required.")
+
     existing = connection.execute(
-        "SELECT id FROM categories WHERE code = ? COLLATE NOCASE", (code,)
+        """
+        SELECT id FROM categories
+        WHERE name = ? COLLATE NOCASE OR code = ? COLLATE NOCASE
+        """,
+        (name, code),
     ).fetchone()
     if existing:
-        raise HTTPException(status_code=409, detail="Category code already exists.")
+        raise HTTPException(
+            status_code=409,
+            detail="An absence category with this name or code already exists.",
+        )
 
     category_id = str(uuid.uuid4())
     connection.execute(
         "INSERT INTO categories (id, name, code, colour) VALUES (?, ?, ?, ?)",
-        (category_id, name, code, payload.colour),
+        (category_id, name, code, payload.colour.upper()),
     )
     record_audit(connection, current_user["id"], "create category", "Category")
     connection.commit()

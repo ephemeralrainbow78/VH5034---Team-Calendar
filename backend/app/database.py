@@ -2,6 +2,8 @@ import sqlite3
 import uuid
 from pathlib import Path
 
+from .bank_holidays import ensure_bank_holidays_for_all_users
+
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 DATA_DIR = BACKEND_DIR / "data"
 DATA_DIR.mkdir(parents=True, exist_ok=True)
@@ -53,6 +55,7 @@ def init_database() -> None:
                 (str(uuid.uuid4()), name, code, colour),
             )
 
+        ensure_bank_holidays_for_all_users(connection)
         connection.commit()
     finally:
         connection.close()
