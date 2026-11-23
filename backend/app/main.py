@@ -18,12 +18,16 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="Team Calendar", lifespan=lifespan)
-cors_origins = os.getenv("CORS_ORIGINS")
-allowed_origins = (
-    [origin.strip().rstrip("/") for origin in cors_origins.split(",") if origin.strip()]
-    if cors_origins
-    else ["http://localhost:5173", "http://127.0.0.1:5173"]
-)
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "https://vh5034-team-calendar-dmaw.onrender.com",
+]
+for origin in os.getenv("CORS_ORIGINS", "").split(","):
+    origin = origin.strip().rstrip("/")
+    if origin and origin not in allowed_origins:
+        allowed_origins.append(origin)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
