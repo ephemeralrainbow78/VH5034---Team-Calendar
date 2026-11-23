@@ -2,9 +2,10 @@ import { Alert, Box, Container, Divider, Paper, Stack, Typography } from "@mui/m
 import { CalendarHeader } from "../components/calendar_header"
 import { SnapshotCards } from "../components/snapshot_cards"
 import { CalendarToolbar } from "../components/calendar_toolbar"
-import { useEffect, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { TODAY } from "../utils/dates"
 import { exportCalendarToExcel } from "../utils/calendar_export"
+import { getTodaySnapshot } from "../utils/calendar_snapshot"
 import { CalendarGrid } from "../components/calendar_grid"
 import { GetUsers } from "../routes/users"
 import { GetAvailability } from "../routes/availiability"
@@ -33,6 +34,12 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
 
     const year = cursor.getFullYear()
     const month = cursor.getMonth()
+    const snapshot = useMemo(
+        () => getTodaySnapshot({ staff, availability, categories, today: TODAY }),
+        [staff, availability, categories]
+    )
+    const snapshotLoading = !usersLoaded || loadedCalendarRefresh !== calendarRefresh
+    const snapshotUnavailable = Boolean(usersError || calendarDataError)
 
     const goToMonth = (delta) => {
         setCursor(new Date(year, month + delta, 1))
@@ -119,7 +126,11 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                             Last Synced at
                         </Typography>
                     </Stack>
-                    <SnapshotCards />
+                    <SnapshotCards
+                        {...snapshot}
+                        isLoading={snapshotLoading}
+                        hasError={snapshotUnavailable}
+                    />
                 </Box>
                 <Paper variant="outlined" sx={{ borderColor: 'divider', mt: { xs: 4, md: 5 } }}>
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
