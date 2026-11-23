@@ -4,7 +4,14 @@ import uuid
 from fastapi import APIRouter, Depends, HTTPException, status
 
 from ..audit import record_audit
-from ..schema import LoginRequest, SignUpRequest, UserOut, tokenResponse
+from ..schema import (
+    LoginRequest,
+    MessageOut,
+    PasswordChangeRequest,
+    SignUpRequest,
+    UserOut,
+    tokenResponse,
+)
 from ..security import create_access_token, hashed_password, verify_password
 from ..user_dependents import get_current_user, get_database
 
@@ -129,3 +136,37 @@ def account(
     if row is None:
         raise HTTPException(status_code=404, detail="User not found.")
     return _user_out(row)
+
+
+@router.patch("/account/password", response_model=MessageOut)
+def change_password(
+    payload: PasswordChangeRequest,
+    current_user: sqlite3.Row = Depends(get_current_user),
+    connection: sqlite3.Connection = Depends(get_database),
+):
+    if not verify_password(payload.current_password, current_user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Current password is incorrect.",
+        )
+    if verify_password(payload.new_password, current_user["password"]):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="New password must be different from the current password.",
+        )
+
+    connection.execute(
+        """
+        UPDATE users
+        SET password = ?, last_updated = datetime('now'), last_updated_by = ?
+        WHERE id = ?
+        """,
+        (
+            hashed_password(payload.new_password),
+            current_user["username"],
+            current_user["id"],
+        ),
+    )
+    record_audit(connection, current_user["id"], "change password", "User")
+    connection.commit()
+    return {"message": "Password updated successfully."}

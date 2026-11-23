@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react"
 import {
     Add,
+    AccountCircle,
     ArrowBack,
     Delete,
     Edit,
@@ -265,6 +266,15 @@ export const TeamManagementPage = ({ token, currentUser, onLogout }) => {
                         </Typography>
                     </Box>
                     <Stack direction="row" spacing={1.5} sx={{ flexWrap: "wrap", rowGap: 1 }}>
+                        <Button
+                            variant="outlined"
+                            color="inherit"
+                            startIcon={<AccountCircle />}
+                            onClick={() => navigate("/account")}
+                            sx={{ borderColor: "#d8d7d3", color: "text.primary" }}
+                        >
+                            My Account
+                        </Button>
                         <Button
                             variant="outlined"
                             color="inherit"

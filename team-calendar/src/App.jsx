@@ -6,6 +6,7 @@ import { LoginPage } from './pages/login.jsx'
 import { SignupPage } from './pages/signup.jsx'
 import { CalendarPage } from './pages/calendar.jsx'
 import { TeamManagementPage } from './pages/team_management.jsx'
+import { AccountPage } from './pages/account.jsx'
 import { GetCurrentUser } from './routes/auth.js'
 
 const TOKEN_STORAGE_KEY = 'team-calendar-token'
@@ -95,6 +96,18 @@ function App() {
               ) : (
                 <Navigate to="/calendar" replace />
               )
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/account"
+          element={
+            authStatus === 'checking' ? (
+              <Typography role="status">Checking your session...</Typography>
+            ) : authStatus === 'authenticated' && token ? (
+              <AccountPage token={token} currentUser={currentUser} onLogout={handleLogout} />
             ) : (
               <Navigate to="/" replace />
             )
