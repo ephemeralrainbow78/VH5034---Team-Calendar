@@ -29,6 +29,7 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [loadedCalendarRefresh, setLoadedCalendarRefresh] = useState(null)
     const [calendarDataError, setCalendarDataError] = useState('')
     const [calendarExportError, setCalendarExportError] = useState('')
+    const [calendarActionAlert, setCalendarActionAlert] = useState(null)
     const [calendarRefresh, setCalendarRefresh] = useState(0)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [cursor, setCursor] = useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
@@ -130,6 +131,15 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                     currentUser={currentUser}
                     onLogout={onLogout}
                 />
+                {calendarActionAlert && (
+                    <Alert
+                        severity={calendarActionAlert.severity}
+                        sx={{ mt: 2 }}
+                        onClose={() => setCalendarActionAlert(null)}
+                    >
+                        {calendarActionAlert.message}
+                    </Alert>
+                )}
                 {calendarExportError && <Alert severity="error" sx={{ mt: 2 }}>{calendarExportError}</Alert>}
                 <Box>
                     <Stack direction='row' sx={{ flexWrap: 'wrap', mb: 1.5, justifyContent: 'space-between', alignItems: 'baseline' }}>
@@ -150,15 +160,21 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
                     <Box sx={{ p: { xs: 2, md: 3 } }}>
                         <CalendarToolbar monthLabel={MONTH_FORMATTER.format(cursor)} onPreviousMonth={() => goToMonth(-1)} onNextMonth={() => goToMonth(1)} onToday={goToToday} viewMode={viewMode} onViewModeChange={setViewMode} search={search} onSearchChange={setSearch} team={team} onTeamChange={setTeam} statusFilter={statusFilter} onStatusFilterChange={setStatusFilter} staffCount={filteredStaff.length} />
                     </Box>
-                    {usersError && <Typography color="error" role="alert">Could not load users: {usersError}</Typography>}
-                    {calendarDataError && <Typography color="error" role="alert">{calendarDataError}</Typography>}
+                    {usersError && <Alert severity="error" sx={{ m: 2 }}>Could not load users: {usersError}</Alert>}
+                    {calendarDataError && <Alert severity="error" sx={{ m: 2 }}>{calendarDataError}</Alert>}
                     <Divider />
                     <CalendarGrid year={year} month={month} today={TODAY} staff={filteredStaff} availability={availability} categories={categories}/>
                 </Paper>
                 <AddAbsenceDialog
                     open={dialogOpen}
                     onClose={() => setDialogOpen(false)}
-                    onCreated={() => setCalendarRefresh((refresh) => refresh + 1)}
+                    onCreated={() => {
+                        setCalendarRefresh((refresh) => refresh + 1)
+                        setCalendarActionAlert({
+                            severity: 'success',
+                            message: 'Absence added successfully.'
+                        })
+                    }}
                     staff={staff}
                     currentUser={currentUser}
                     token={token}

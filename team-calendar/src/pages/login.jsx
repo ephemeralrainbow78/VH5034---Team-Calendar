@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
-import { Link, useNavigate } from 'react-router-dom'
+import { Alert, Box, Button, Paper, Stack, TextField, Typography } from '@mui/material'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { Login } from '../routes/auth'
 
 export const LoginPage = ({ onLogin }) => {
@@ -8,7 +8,9 @@ export const LoginPage = ({ onLogin }) => {
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
     const [isSubmitting, setIsSubmitting] = useState(false)
+    const location = useLocation()
     const navigate = useNavigate()
+    const signupSuccess = location.state?.signupSuccess
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -45,9 +47,10 @@ export const LoginPage = ({ onLogin }) => {
                     <Typography variant="h6">Log In</Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
                         <Stack spacing={2.5}>
+                            {signupSuccess && <Alert severity="success">{signupSuccess}</Alert>}
                             <TextField label="Username" value={username} onChange={(e) => setUsername(e.target.value)} fullWidth autoFocus />
                             <TextField label="Password" value={password} onChange={(e) => setPassword(e.target.value)} type="password" fullWidth />
-                            {error && <Typography color="error" role="alert">{error}</Typography>}
+                            {error && <Alert severity="error">{error}</Alert>}
                             <Button type="submit" variant="contained" size="large" disabled={isSubmitting} fullWidth>
                                 Log In
                             </Button>

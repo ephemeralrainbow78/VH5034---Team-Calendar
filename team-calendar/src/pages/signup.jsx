@@ -1,4 +1,4 @@
-import { Box, Button, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material"
+import { Alert, Box, Button, MenuItem, Paper, Stack, TextField, Typography } from "@mui/material"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { GetTeams } from "../routes/team"
@@ -26,15 +26,18 @@ export const SignupPage = () => {
     const [error, setError] = useState('')
     const [form, setForm] = useState(EMPTY_SIGNUP_FORM)
     const [teams, setTeams] = useState([])
+    const [teamsLoaded, setTeamsLoaded] = useState(false)
+    const [isSubmitting, setIsSubmitting] = useState(false)
 
     const isValid = form.first_name.trim() && form.last_name.trim() && form.password.length >= 12 && form.confirmPassword === form.password && form.username.trim() && form.team.trim() && form.role
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if(!isValid) return;
+        if(!isValid || isSubmitting) return
 
         try{
             setError('')
+            setIsSubmitting(true)
             const signupData = {
                 first_name: form.first_name,
                 last_name: form.last_name,
@@ -43,10 +46,17 @@ export const SignupPage = () => {
                 team: form.team,
                 role: form.role
             }
-            await Signup(signupData)
-            navigate('/', { replace: true })
+            const createdUser = await Signup(signupData)
+            navigate('/', {
+                replace: true,
+                state: {
+                    signupSuccess: `Account for ${createdUser.first_name} was created successfully. You can now sign in.`
+                }
+            })
         }catch (error) {
             setError(error.message)
+        } finally {
+            setIsSubmitting(false)
         }
     }
 
@@ -63,6 +73,8 @@ export const SignupPage = () => {
             if (!cancelled) {
                 setError(`Could not load teams: ${error.message}`)
             }
+        }).finally(() => {
+            if (!cancelled) setTeamsLoaded(true)
         })
 
         return () => {
@@ -77,7 +89,10 @@ export const SignupPage = () => {
                     <Typography variant="h6">Create Account</Typography>
                     <Box component="form" onSubmit={handleSubmit} noValidate>
                         <Stack spacing={2.5}>
-                            {error && <Typography color="error" role="alert">{error}</Typography>}
+                            {error && <Alert severity="error">{error}</Alert>}
+                            {teamsLoaded && teams.length === 0 && !error && (
+                                <Alert severity="warning">No teams are available. Contact an administrator before creating an account.</Alert>
+                            )}
                             <TextField label="First Name" value={form.first_name} onChange={(e) => setForm({...form, first_name: e.target.value})} fullWidth autoFocus />
                             <TextField label="Last Name" value={form.last_name} onChange={(e) => setForm({...form, last_name: e.target.value})} fullWidth autoFocus />
                             <TextField label="Username" value={form.username} onChange={(e) => setForm({...form, username: e.target.value})} fullWidth autoFocus />
@@ -97,8 +112,8 @@ export const SignupPage = () => {
                                     </MenuItem>
                                 ))}
                             </TextField>
-                            <Button type="submit" variant="contained" fullWidth disabled={!isValid}>
-                                Create Account
+                            <Button type="submit" variant="contained" fullWidth disabled={!isValid || isSubmitting}>
+                                {isSubmitting ? 'Creating account...' : 'Create Account'}
                             </Button>
                         </Stack>
                     </Box>

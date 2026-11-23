@@ -467,9 +467,9 @@ export const TeamManagementPage = ({ token, currentUser, onLogout }) => {
                         <DialogTitle>Delete team</DialogTitle>
                         <DialogContent>
                             <Stack spacing={2} sx={{ pt: 1 }}>
-                                <Typography>
+                                <Alert severity="warning">
                                     Delete {deleteTargetTeam?.name}? This cannot be undone. Teams with assigned members must be emptied first.
-                                </Typography>
+                                </Alert>
                                 <Typography variant="body2" color="text.secondary">
                                     Any existing absence records still linked to this team will be kept and marked as unassigned.
                                 </Typography>
@@ -493,6 +493,9 @@ export const TeamManagementPage = ({ token, currentUser, onLogout }) => {
                                 <Typography variant="body2" color="text.secondary">
                                     Select an active member of {moveDialogTeam?.name} and choose their new team.
                                 </Typography>
+                                <Alert severity="warning">
+                                    Moving a member also updates the team linked to their existing absences.
+                                </Alert>
                                 {moveError && <Alert severity="error">{moveError}</Alert>}
                                 <TextField
                                     select
