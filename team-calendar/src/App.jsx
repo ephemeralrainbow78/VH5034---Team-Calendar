@@ -5,6 +5,7 @@ import { Typography } from '@mui/material'
 import { LoginPage } from './pages/login.jsx' 
 import { SignupPage } from './pages/signup.jsx'
 import { CalendarPage } from './pages/calendar.jsx'
+import { TeamManagementPage } from './pages/team_management.jsx'
 import { GetCurrentUser } from './routes/auth.js'
 
 const TOKEN_STORAGE_KEY = 'team-calendar-token'
@@ -78,6 +79,22 @@ function App() {
               <Typography role="status">Checking your session...</Typography>
             ) : authStatus === 'authenticated' && token ? (
               <CalendarPage token={token} currentUser={currentUser} onLogout={handleLogout} />
+            ) : (
+              <Navigate to="/" replace />
+            )
+          }
+        />
+        <Route
+          path="/teams"
+          element={
+            authStatus === 'checking' ? (
+              <Typography role="status">Checking your session...</Typography>
+            ) : authStatus === 'authenticated' && token ? (
+              currentUser?.role?.toLowerCase() === 'admin' ? (
+                <TeamManagementPage token={token} currentUser={currentUser} onLogout={handleLogout} />
+              ) : (
+                <Navigate to="/calendar" replace />
+              )
             ) : (
               <Navigate to="/" replace />
             )
