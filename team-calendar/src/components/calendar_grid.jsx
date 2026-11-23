@@ -25,9 +25,9 @@ const getAvailabilityByCell = (availability) => {
     return byCell
 }
 
-export const CalendarGrid = ({ year, month, today, staff = [], availability = [], categories = [] }) => {
+export const CalendarGrid = ({ year, month, today, staff = [], availability = [], categories = [], visibleDays, viewMode = 'month' }) => {
     const [sortDirection, setSortDirection] = useState(null)
-    const days = daysInMonth(year, month)
+    const days = visibleDays || daysInMonth(year, month)
     const daysToDate = days.filter((day) => day <= today)
     const availabilityByCell = getAvailabilityByCell(availability)
     const categoriesById = new Map(categories.map((category) => [category.id, category]))
@@ -76,7 +76,7 @@ export const CalendarGrid = ({ year, month, today, staff = [], availability = []
                 })}
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', py: 1, borderBottom: '1px solid', borderLeft: '1px solid', borderColor: 'divider' }}>
                     <Typography variant="body2" sx={{ color: 'text.secondary' }}>
-                        Days in
+                        {viewMode === 'week' ? 'Week' : 'Days in'}
                     </Typography>
                     <Typography variant="caption" sx={{ color: 'text.disabled' }}>
                         to date

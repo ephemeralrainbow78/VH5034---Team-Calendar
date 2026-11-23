@@ -1,5 +1,5 @@
-import { Box, Button, Chip, Stack, Typography } from "@mui/material"
-import { AccountCircle, Add, FiberManualRecord, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
+import { Box, Button, Stack, Typography } from "@mui/material"
+import { AccountCircle, Add, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
 import { Link } from "react-router-dom"
 
 export const CalendarHeader = ({ onExport, exportDisabled = false, onAddAbsence, currentUser, onLogout }) => {
@@ -10,7 +10,6 @@ export const CalendarHeader = ({ onExport, exportDisabled = false, onAddAbsence,
                     <Typography variant="h4" component="h1">
                         Team Calendar
                     </Typography>
-                    <Chip size="small" icon={<FiberManualRecord sx={{ fontSize: 10 }} color="success" />} label="Live" sx={{ bgcolor: '#e7f5ec', color: '#12825a', fontWeight: 700, '& .MuiChip-icon': { ml: '8px' } }} />
                 </Stack>
                 <Typography variant="body2" sx={{ my: 0.5 }}>
                     {currentUser ? `Signed in ${currentUser.first_name} - ${currentUser.team}` : `A view of the team's calendar`}

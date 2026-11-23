@@ -1,5 +1,3 @@
-const pad = (value) => String(value).padStart(2, '0')
-
 export const filterCalendarStaff = ({
     staff,
     availability,
@@ -7,8 +5,8 @@ export const filterCalendarStaff = ({
     search,
     team,
     statusFilter,
-    year,
-    month
+    rangeStart,
+    rangeEnd
 }) => {
     const searchTerm = search.trim().toLocaleLowerCase()
     const selectedTeam = team.toLocaleLowerCase()
@@ -18,14 +16,12 @@ export const filterCalendarStaff = ({
             .filter((category) => category.name.trim().toLocaleLowerCase() === selectedStatus)
             .map((category) => category.id)
     )
-    const monthStart = `${year}-${pad(month + 1)}-01`
-    const monthEnd = `${year}-${pad(month + 1)}-${pad(new Date(year, month + 1, 0).getDate())}`
     const staffWithStatus = new Set(
         availability
             .filter((entry) => (
                 matchingCategoryIds.has(entry.category_id) &&
-                entry.start_date <= monthEnd &&
-                entry.end_date >= monthStart
+                entry.start_date <= rangeEnd &&
+                entry.end_date >= rangeStart
             ))
             .map((entry) => entry.user_id)
     )
