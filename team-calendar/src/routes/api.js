@@ -1,6 +1,6 @@
-export const API_BASE_URL = (
-    import.meta.env?.VITE_API_URL || "http://127.0.0.1:8000/api"
-).replace(/\/+$/, "")
+export const API_BASE_URL = import.meta.env.DEV
+    ? "http://127.0.0.1:8000/api"
+    : "https://vh5034-team-calendar.onrender.com/api"
 
 export const readJsonResponse = async (response) => {
     const body = await response.text()
