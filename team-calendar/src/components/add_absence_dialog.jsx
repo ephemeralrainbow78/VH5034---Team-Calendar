@@ -93,7 +93,7 @@ export const AddAbsenceDialog = ({ open, onClose, onCreated, staff, currentUser,
                     <Stack spacing={2} sx={{ pt: 1 }}>
                         {error && <Alert severity="error">{error}</Alert>}
                         {(isAdmin || isManager) && eligibleStaff.length === 0 && (
-                            <Alert severity="info">No active staff members are available to add an absence for.</Alert>
+                            <Alert severity="warning">No active staff members are available to add an absence for.</Alert>
                         )}
                         <TextField
                             select
