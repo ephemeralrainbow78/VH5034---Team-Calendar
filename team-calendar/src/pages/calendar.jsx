@@ -1,9 +1,10 @@
-import { Box, Container, Divider, Paper, Stack, Typography } from "@mui/material"
+import { Alert, Box, Container, Divider, Paper, Stack, Typography } from "@mui/material"
 import { CalendarHeader } from "../components/calendar_header"
 import { SnapshotCards } from "../components/snapshot_cards"
 import { CalendarToolbar } from "../components/calendar_toolbar"
 import { useEffect, useState } from "react"
 import { TODAY } from "../utils/dates"
+import { exportCalendarToExcel } from "../utils/calendar_export"
 import { CalendarGrid } from "../components/calendar_grid"
 import { GetUsers } from "../routes/users"
 import { GetAvailability } from "../routes/availiability"
@@ -19,10 +20,13 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     const [team, setTeam] = useState('all')
     const [statusFilter, setStatusFitler] = useState('all')
     const [staff, setStaff] = useState([])
+    const [usersLoaded, setUsersLoaded] = useState(false)
     const [usersError, setUsersError] = useState('')
     const [availability, setAvailability] = useState([])
     const [categories, setCategories] = useState([])
+    const [loadedCalendarRefresh, setLoadedCalendarRefresh] = useState(null)
     const [calendarDataError, setCalendarDataError] = useState('')
+    const [calendarExportError, setCalendarExportError] = useState('')
     const [calendarRefresh, setCalendarRefresh] = useState(0)
     const [dialogOpen, setDialogOpen] = useState(false)
     const [cursor, setCursor] = useState(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
@@ -38,18 +42,35 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
         setCursor(new Date(TODAY.getFullYear(), TODAY.getMonth(), 1))
     }
 
-    const handleExportCalendar = () => {
-
+    const handleExportCalendar = async () => {
+        setCalendarExportError('')
+        try {
+            await exportCalendarToExcel({
+                year,
+                month,
+                staff,
+                availability,
+                categories,
+                today: TODAY
+            })
+        } catch (error) {
+            setCalendarExportError(`Could not export the calendar: ${error.message}`)
+        }
     }
 
     useEffect(() => {
         let active = true
         GetUsers(token)
             .then(users => {
-                if (active) setStaff(users)
+                if (!active) return
+                setStaff(users)
+                setUsersError('')
             })
             .catch(error => {
                 if (active) setUsersError(error.message)
+            })
+            .finally(() => {
+                if (active) setUsersLoaded(true)
             })
 
         return () => {
@@ -69,6 +90,9 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
             .catch(error => {
                 if (active) setCalendarDataError(`Could not load calendar data: ${error.message}`)
             })
+            .finally(() => {
+                if (active) setLoadedCalendarRefresh(calendarRefresh)
+            })
 
         return () => {
             active = false
@@ -78,7 +102,14 @@ export const CalendarPage = ({ token, currentUser, onLogout }) => {
     return (
         <Box sx={{ bgcolor: 'background.default', minHeight: '100vh', py: { xs: 3, md: 5 } }}>
             <Container maxWidth="lg">
-                <CalendarHeader onExport={handleExportCalendar} onAddAbsence={() => setDialogOpen(true)} currentUser={currentUser} onLogout={onLogout}/>
+                <CalendarHeader
+                    onExport={handleExportCalendar}
+                    exportDisabled={!usersLoaded || loadedCalendarRefresh !== calendarRefresh || Boolean(usersError || calendarDataError)}
+                    onAddAbsence={() => setDialogOpen(true)}
+                    currentUser={currentUser}
+                    onLogout={onLogout}
+                />
+                {calendarExportError && <Alert severity="error" sx={{ mt: 2 }}>{calendarExportError}</Alert>}
                 <Box>
                     <Stack direction='row' sx={{ flexWrap: 'wrap', mb: 1.5, justifyContent: 'space-between', alignItems: 'baseline' }}>
                         <Typography variant="overline" sx={{ fontWeight: 700, color: 'text.secondary' }}>

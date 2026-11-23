@@ -2,7 +2,7 @@ import { Box, Button, Chip, Stack, Typography } from "@mui/material"
 import { AccountCircle, Add, FiberManualRecord, FileDownloadDoneOutlined, Groups, Logout } from "@mui/icons-material"
 import { Link } from "react-router-dom"
 
-export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }) => {
+export const CalendarHeader = ({ onExport, exportDisabled = false, onAddAbsence, currentUser, onLogout }) => {
     return (
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <Box>
@@ -25,7 +25,7 @@ export const CalendarHeader = ({ onExport, onAddAbsence, currentUser, onLogout }
                         Manage Teams
                     </Button>
                 )}
-                <Button variant="outlined" color="inherit" startIcon={<FileDownloadDoneOutlined />} onClick={onExport} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
+                <Button variant="outlined" color="inherit" startIcon={<FileDownloadDoneOutlined />} onClick={onExport} disabled={exportDisabled} sx={{ borderColor: '#d8d7d3', color: 'text.primary' }}>
                     Export
                 </Button>
                 <Button variant="contained" color="primary" startIcon={<Add />} onClick={onAddAbsence}>
