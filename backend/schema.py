@@ -10,6 +10,7 @@ class SignUpRequest(BaseModel):
     username: str = Field(min_length = 1)
     password:str = Field(min_length = 12)
     team: str = Field(min_length = 1)
+    role: str = Field(min_length = 1)
 
 class LoginRequest(BaseModel):
     username: str = Field(min_length = 1)
@@ -22,7 +23,8 @@ class UserOut(BaseModel):
     username: str 
     team_id: Optional[str] = None
     team: Optional [str] = None
-    is_Active: bool
+    role: str
+    is_active: bool
 
 class tokenResponse(BaseModel):
     token: str
@@ -43,19 +45,19 @@ class TeamOut(BaseModel):
     updated_by: Optional[str] = None
 
 # Categories
-class CagegoryCreate(BaseModel):
+class CategoryCreate(BaseModel):
     name: str = Field(min_length = 1)
     code: str = Field(min_length = 1)
-    color: Optional[str] = None
+    colour: Optional[str] = None
  
 class CategoryOut(BaseModel):
     id: str
     name: str
     code: str
-    color: str
+    colour: str
 
 # Availability
-class AvailiabilityCreate(BaseModel):
+class AvailabilityCreate(BaseModel):
     user_id: str
     category_id: str
     start_date: date
@@ -63,13 +65,13 @@ class AvailiabilityCreate(BaseModel):
     notes: Optional[str] = None
     team_id: Optional[str] = None
 
-class AvailiabilityUpdate(BaseModel):
+class AvailabilityUpdate(BaseModel):
     category_id: Optional[str] = None
     start_date: Optional[date] = None
     end_date: Optional[date] = None
     notes: Optional[str] = None
 
-class AvailiabilityOut(BaseModel):
+class AvailabilityOut(BaseModel):
     id: str
     user_id: str
     category_id: str
